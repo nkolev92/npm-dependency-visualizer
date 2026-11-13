@@ -1,0 +1,21 @@
+{
+  "name": "npm-dependency-visualizer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Visualize npm lockfile dependencies as Markdown and Mermaid",
+  "type": "module",
+  "bin": {
+    "npm-dependency-visualizer": "./cli.js"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0",
+    "marked": "16.4.2",
+    "mermaid": "12.3.0"
+  }
+}

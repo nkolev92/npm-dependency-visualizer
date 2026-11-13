@@ -1,0 +1,33 @@
+{
+  "name": "sample-project",
+  "version": "1.0.0",
+  "dependencies": {
+    "@scope/tool": "git+https://example.invalid/tool.git#v2",
+    "a": "^1.0.0",
+    "alias": "npm:real-lib@^3.0.0",
+    "b": "~2.0.0",
+    "both": "^1.0.0",
+    "opt": "^1.0.0",
+    "remote": "https://example.invalid/remote.tgz"
+  },
+  "devDependencies": {
+    "both": "^1.0.0",
+    "dev": "^1.0.0"
+  },
+  "optionalDependencies": {
+    "absent-opt": "^1.0.0",
+    "opt": "~2.0.0"
+  },
+  "peerDependencies": {
+    "host": "^7.0.0",
+    "maybe-peer": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "maybe-peer": {
+      "optional": true
+    }
+  },
+  "overrides": {
+    "shared": "^1.2.0"
+  }
+}
