@@ -4,8 +4,12 @@ Generate a dependency graph from a local `package.json` and `package-lock.json`.
 The output is a Markdown document with a Mermaid diagram.
 Package nodes show locked versions, and arrows show the original dependency specifications and roles.
 
-The CLI requires Node.js 22.12.0 or later and supports lockfile versions 2 and 3.
-It has no runtime dependencies, does not read `node_modules`, and makes no network requests or changes to the inputs.
+The CLI requires Node.js 22.12.0 or later and a `package-lock.json` matching the project's `package.json` (lockfile version 2 or 3).
+It uses the lockfile, not the contents of `node_modules`, so dependencies do not need to be installed.
+The CLI has no runtime dependencies, makes no network requests, and does not change the inputs.
+
+If `package-lock.json` is missing, provide an existing lockfile or run `npm install --package-lock-only` in the project directory.
+Generating a lockfile is a separate npm operation that may access the network and resolve different versions than an existing installation.
 
 ## Usage
 
@@ -73,7 +77,7 @@ An output file is replaced only after the report is generated, and input files a
 | --- | --- |
 | `0` | Report generated, possibly with optional-dependency or link warnings |
 | `1` | Invalid arguments or input, unmatched focus, or output failure |
-| `2` | Diagnostic report generated for missing required dependencies, missing non-root versions, or unsupported private peer placement |
+| `2` | Diagnostic report generated for missing required dependencies in the lockfile, missing non-root versions, or unsupported private peer placement |
 
 ## Scope and limitations
 
@@ -84,9 +88,9 @@ Distinct installation locations remain distinct nodes, including when their name
 Mermaid's default `maxEdges` limit is 500, so large graphs (for example, npm/cli with `--include-dev`, 2,406 relationships) need `--depth`, `--focus <name> --focus-mode filter`, or a renderer configured with a higher limit.
 
 Workspaces declared in the root `package.json` are included by default.
-Without `--include-dev`, a workspace appears only when a declared dependency reaches it through its `node_modules` link; there are never synthetic root-to-workspace edges.
+Without `--include-dev`, a workspace appears only when a declared dependency reaches it through its `node_modules` link in the lockfile; there are never synthetic root-to-workspace edges.
 Workspace nodes use Mermaid's double-bordered subroutine shape and a `(workspace)` label, and the report states how many declared workspaces were reached.
-Workspace dependencies resolve from the workspace's own `node_modules` first, then from the root.
+Workspace dependencies resolve using the lockfile's `node_modules` locations, starting with the workspace and then the root.
 Use `--workspace <name>` to start at one workspace, or `--no-workspaces` to restore the root-only graph.
 Non-workspace local-directory links (such as `file:` dependencies) are excluded and reported.
 The original edge specifications are displayed even when root overrides are present; the tool does not calculate effective override ranges.
@@ -94,12 +98,4 @@ The original edge specifications are displayed even when root overrides are pres
 Use `--focus` to inspect current parent chains to a dependency, not to calculate an upgrade plan.
 Determining which releases enable a new dependency version requires additional release metadata and constraint analysis.
 
-Reports are tested with Mermaid 12.3.0.
-The focused sample and npm/cli `read` diagrams were visually checked in a local Markdown viewer using Marked 16.4.2, Mermaid 12.3.0, and Chrome 157.0.8103.40.
-Focus colors and path styling were also checked in local Chrome on the small fixture and the full npm/cli graph, retaining all 125 nodes and 255 relationships of the root-only (`--no-workspaces`) graph.
 Large graphs may exceed a viewer's layout limits; use `--depth` or `--focus <name> --focus-mode filter` for a smaller view.
-
-## Tests
-
-Install the development dependencies with `npm ci`, then run `npm test`.
-Tests use local fixtures, including an npm/cli snapshot pinned to a single commit; they do not fetch current npm/cli files.
