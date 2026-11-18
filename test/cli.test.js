@@ -77,6 +77,25 @@ test('output is always Markdown, including development roles', () => {
   assert.match(full.stdout, /dev: both @ \^1\.0\.0/)
 })
 
+test('repeated focus options combine packages in highlight and filter modes', () => {
+  for (const mode of ['highlight', 'filter']) {
+    const args = ['--focus', 'shared', '--focus', 'alias', '--focus-mode', mode]
+    const result = run([complexDirectory, ...args])
+    assert.equal(result.status, 0, result.stderr)
+    assert.match(result.stdout, /Filters: focus shared, alias; depth unlimited/)
+    assert.match(result.stdout, /matching instances: 3/)
+    assert.match(result.stdout, mode === 'highlight'
+      ? /Displayed: 16 nodes, 20 relationships/
+      : /Displayed: 8 nodes, 10 relationships/)
+    assert.equal(run([complexDirectory, ...args, '--focus', 'shared']).stdout, result.stdout)
+    const single = ['--focus', 'shared', '--focus-mode', mode]
+    assert.equal(
+      run([complexDirectory, ...single, '--focus', 'shared']).stdout,
+      run([complexDirectory, ...single]).stdout,
+    )
+  }
+})
+
 test('equivalent JSON key orders produce byte-identical output', async t => {
   const directory = await temporaryDirectory(t)
   for (const filename of ['package.json', 'package-lock.json']) {
@@ -148,6 +167,9 @@ test('invalid arguments, malformed input, unsupported versions, and unmatched fo
     [complexDirectory, '--depth', '-1'],
     [complexDirectory, '--depth', '1.5'],
     [complexDirectory, '--focus', 'not-here'],
+    [complexDirectory, '--focus', 'shared', '--focus', 'not-here'],
+    [complexDirectory, '--focus', '', '--focus', 'shared'],
+    [complexDirectory, '--focus', 'shared', '--focus', ''],
     [complexDirectory, '--focus', 'shared', '--focus-mode', 'invalid'],
     [complexDirectory, '--focus', 'shared', '--focus-mode', ''],
     [complexDirectory, '--focus-mode', 'filter'],

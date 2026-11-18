@@ -88,7 +88,7 @@ Arbitrarily named or independently located input files are outside the initial C
 | `--depth <n>` | Maximum dependency-edge distance from the start node; nonnegative integer | Unlimited |
 | `--workspace <name>` | Start at the workspace with this package name or lockfile location | Root |
 | `--no-workspaces` | Exclude workspaces and visualize only the root graph; incompatible with `--workspace` | Workspaces included |
-| `--focus <name>` | Highlight instances with this exact declared dependency name and their ancestor paths | None |
+| `--focus <name>` | Highlight instances with this exact declared dependency name and their ancestor paths; repeat for multiple names | None |
 | `--focus-mode highlight\|filter` | Keep the rest of the graph or remove unrelated branches; requires `--focus` | `highlight` |
 | `--help` | Show usage | |
 | `--version` | Show tool version | |
@@ -149,6 +149,7 @@ Do not invent internal dependency edges when a bundled package's metadata is inc
 Apply dependency-type selection and workspace/link exclusions before view filters.
 
 With `--focus <name>`, match every reachable instance with that exact declared dependency name, including aliases.
+Repeat `--focus` to combine the matching instances and ancestor paths for multiple names; repeated names do not duplicate matches.
 Compute the root, matching instances, and their ancestors: the reverse-reachable dependency subgraph that leads to the matches.
 Highlight matching nodes, ancestor nodes, and relationships whose endpoints both belong to this subgraph.
 Use the Sunset Boulevard palette: coral (`#f4a261`) for matches, warm sand (`#e9c46a`) for ancestors, burnt orange (`#e76f51`) for path edges, and dark contrast (`#264653`) for highlighted node text and borders.
@@ -167,7 +168,7 @@ Keep relationships whose endpoints both survive the filters.
 If focus and depth are supplied, compute focus first, optionally filter to its subgraph, and apply depth second.
 A matching package may therefore be outside the displayed depth; report that explicitly.
 Visible ancestors and their relationships can remain highlighted even when a matching instance is outside the depth limit.
-A focus name with no reachable matches is a command error.
+Any requested focus name with no reachable matches is a command error, even if other requested names match.
 Unresolved dependency placeholders participate in focus and depth selection using their declared names and parent relationships.
 
 Report the active filters and the number of omitted nodes and relationships relative to the selected root graph before view filtering.

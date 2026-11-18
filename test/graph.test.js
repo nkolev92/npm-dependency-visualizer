@@ -120,6 +120,38 @@ test('filter mode keeps matches and ancestor context, not unrelated descendants'
   assert.throws(() => selectView(graph, { focus: 'no-such-package' }), /No reachable dependency/)
 })
 
+test('multiple focus names combine matches and ancestors without counting duplicates', async () => {
+  const graph = buildGraph(await complex())
+  const shared = selectView(graph, { focus: 'shared' })
+  const alias = selectView(graph, { focus: 'alias' })
+  const view = selectView(graph, { focus: ['shared', 'alias', 'shared'] })
+  assert.equal(view.matchCount, 3)
+  assert.deepEqual(view.matchedNodes, new Set([...shared.matchedNodes, ...alias.matchedNodes]))
+  assert.deepEqual(view.focusNodes, new Set([...shared.focusNodes, ...alias.focusNodes]))
+  assert.deepEqual(view.focusEdges, new Set([...shared.focusEdges, ...alias.focusEdges]))
+  assert.deepEqual(view.nodes, [...graph.nodes.values()])
+  assert.deepEqual(view.edges, graph.edges)
+  assert.match(renderReport(view), /Filters: focus shared, alias; depth unlimited/)
+
+  const filtered = selectView(graph, { focus: ['shared', 'alias'], focusMode: 'filter' })
+  assert.deepEqual(locations(filtered), view.focusNodes)
+  assert.deepEqual(new Set(filtered.edges), view.focusEdges)
+  assert.equal(locations(filtered).has('node_modules/hoisted'), false)
+
+  const limited = selectView(graph, { focus: ['shared', 'alias'], focusMode: 'filter', depth: 1 })
+  assert.deepEqual(locations(limited), new Set(['', 'node_modules/a', 'node_modules/b', 'node_modules/alias']))
+  assert.equal(limited.hiddenMatches, 2)
+  assert.equal(limited.matchCount, 3)
+  assert.match(renderReport(limited), /Matching instances hidden by depth: 2 of 3/)
+})
+
+test('every requested focus name must match a reachable dependency', async () => {
+  const graph = buildGraph(await complex())
+  assert.throws(() => selectView(graph, { focus: ['shared', 'not-here'] }), /No reachable dependency named "not-here"/)
+  assert.throws(() => selectView(graph, { focus: ['not-here', 'also-absent'] }), /No reachable dependencies named "not-here", "also-absent"/)
+  assert.throws(() => selectView(graph, { focus: [] }), /--focus must not be empty/)
+})
+
 test('depth uses shortest graph distance after focus and reports hidden matches', async () => {
   const graph = buildGraph(await complex())
   const zero = selectView(graph, { depth: 0 })

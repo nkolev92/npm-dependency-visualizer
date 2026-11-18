@@ -20,7 +20,7 @@ Options:
   --depth <n>              Limit the graph to n edges from the start node
   --workspace <name>       Start at a workspace (package name or location)
   --no-workspaces          Exclude workspaces; graph only the root project
-  --focus <name>           Highlight matches and ancestor paths, keeping the graph
+  --focus <name>           Highlight matches and ancestor paths; repeat for multiple packages
   --focus-mode <mode>      highlight (default) or filter; requires --focus
   --help                   Show this help
   --version                Show the version
@@ -41,7 +41,7 @@ function optionsFrom(argv) {
         depth: { type: 'string' },
         workspace: { type: 'string' },
         workspaces: { type: 'boolean' },
-        focus: { type: 'string' },
+        focus: { type: 'string', multiple: true },
         'focus-mode': { type: 'string' },
         help: { type: 'boolean' },
         version: { type: 'boolean' },
@@ -54,7 +54,7 @@ function optionsFrom(argv) {
   const { values, positionals } = parsed
   if (positionals.length > 1) throw new InputError('Only one project directory may be specified')
   if (values.output === '') throw new InputError('--output must not be empty')
-  if (values.focus === '') throw new InputError('--focus must not be empty')
+  if (values.focus?.includes('')) throw new InputError('--focus must not be empty')
   if (values.workspace === '') throw new InputError('--workspace must not be empty')
   if (values.workspace !== undefined && values.workspaces === false) {
     throw new InputError('--workspace cannot be combined with --no-workspaces')

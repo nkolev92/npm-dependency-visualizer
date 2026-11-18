@@ -95,7 +95,7 @@ function summary(view) {
   const selection = graph.includeDev
     ? `production, optional, peer, and ${developmentOwners} development dependencies`
     : 'production, optional, and peer dependencies'
-  const focus = view.focus === undefined ? 'none' : view.focus
+  const focus = Array.isArray(view.focus) ? view.focus.join(', ') : view.focus ?? 'none'
   const depth = view.depth === undefined ? 'unlimited' : String(view.depth)
   const lines = [
     `Inputs: package.json, package-lock.json; lockfile version ${graph.lockfileVersion}.`,

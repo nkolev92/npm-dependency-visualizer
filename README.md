@@ -37,6 +37,9 @@ node .\cli.js .\test\fixtures\npm-cli --no-workspaces --output npm-cli-root.md
 # Highlight glob and its ancestor paths without removing the rest of the graph.
 node .\cli.js .\test\fixtures\npm-cli --focus glob --output npm-glob.md
 
+# Keep the combined ancestor paths for multiple packages.
+node .\cli.js .\test\fixtures\npm-cli --focus glob --focus read --focus-mode filter --output npm-glob-read.md
+
 # Use a smaller focused view when a graph is too dense to read.
 node .\cli.js .\test\fixtures\npm-cli --focus read --focus-mode filter --depth 2 --output npm-read.md
 ```
@@ -59,11 +62,13 @@ Generated reports from the pinned npm/cli fixture:
 | `--depth <n>` | Keep nodes at most `n` dependency edges from the start node |
 | `--workspace <name>` | Start the graph at one workspace, matched by package name or location |
 | `--no-workspaces` | Exclude workspaces and show only the root graph |
-| `--focus <name>` | Highlight every matching dependency instance and its ancestor paths, keeping the rest of the graph |
+| `--focus <name>` | Highlight matching dependency instances and their ancestor paths; repeat for multiple packages |
 | `--focus-mode highlight\|filter` | Keep all branches (default), or keep only matches and ancestors; requires `--focus` |
 | `--help`, `--version` | Display usage or the CLI version |
 
 Without focus, the complete selected graph is shown without highlighting.
+Repeat `--focus` to combine matches and ancestor paths for multiple exact dependency names.
+Each requested name must match a reachable dependency; repeated names are counted once.
 Focus uses the Sunset Boulevard palette: coral, thick-bordered nodes are matches; warm-sand nodes are ancestors; thick burnt-orange arrows trace the ancestor subgraph.
 Unrelated nodes and edges keep their normal style.
 The node index also labels matches and ancestors so the report does not rely on color alone.

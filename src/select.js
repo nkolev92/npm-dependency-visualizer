@@ -6,12 +6,20 @@ export function selectView(graph, { focus, focusMode = 'highlight', depth } = {}
   const focusNodes = new Set()
 
   if (focus !== undefined) {
+    const names = new Set(Array.isArray(focus) ? focus : [focus])
+    if (!names.size) throw new InputError('--focus must not be empty')
+    const unmatched = new Set(names)
     for (const edge of graph.edges) {
-      if (edge.name === focus) matchedNodes.add(edge.target)
+      if (names.has(edge.name)) {
+        matchedNodes.add(edge.target)
+        unmatched.delete(edge.name)
+      }
     }
-    if (!matchedNodes.size) {
-      throw new InputError(`No reachable dependency named ${JSON.stringify(focus)}`)
+    if (unmatched.size) {
+      const label = unmatched.size === 1 ? 'dependency' : 'dependencies'
+      throw new InputError(`No reachable ${label} named ${[...unmatched].map(name => JSON.stringify(name)).join(', ')}`)
     }
+    if (Array.isArray(focus)) focus = [...names]
 
     const queue = [...matchedNodes]
     for (const key of matchedNodes) focusNodes.add(key)
